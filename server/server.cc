@@ -10,6 +10,8 @@
 #include <stdlib.h>          // malloc(), delete 
 #include <errno.h>
 #include "utility.h"
+#include "threadpool.h"
+#include "threadworker.h"
 extern int errno;
 
 #define MAXBTYE     10       // maximum received data byte
@@ -73,10 +75,10 @@ int main(int argc,char* argv[])
     // nfds is number of events (number of returned fd)
     int i, maxi, nfds;
     int listenfd, connfd;
-    // read task threads
-    pthread_t tid1, tid2;
-    // write back threads
-    pthread_t tid3, tid4;
+    // read thread pool
+    ThreadPool readPool(3);
+    // write thread pool
+    ThreadPool writePool(3);
     // task node
     Task *new_task = NULL;
     socklen_t clilen;
