@@ -1,4 +1,4 @@
-GCC=openwrt-g++
+GCC=g++
 APP=dada
 
 all: lib server
