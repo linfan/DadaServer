@@ -2,8 +2,9 @@
 #include "threadpool.h"
 
 // the constructor just launches some amount of workers
-ThreadPool::ThreadPool(size_t threads, ThreadWorker *w) : stop(false)
+ThreadPool::ThreadPool(size_t threads)
 {
+    stop = false;
     for(size_t i = 0;i < threads;++i)
     {
         boost::thread *t = new boost::thread(ThreadWorker(this));

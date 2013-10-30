@@ -7,7 +7,7 @@ lib: $(wildcard ../lib/*.cc)
 	$(GCC) -o lib$(APP).so $^ -ldl -shared -fPIC
 
 server: $(wildcard *.cc)
-	$(GCC) -o $(APP)_server $^ -lpthread -lboost_thread -lboost_system -ldl -L. -ldada -fPIC -I../lib -Wall $(CFLAG)
+	$(GCC) -o $(APP)_server $^ -lpthread -lboost_thread -lboost_system -ldl -L. -ldada -fPIC -I../lib -Wall -L${LD_LIBRARY_PATH}
 
 clean :
 	rm -f *.o $(APP)_server
