@@ -12,7 +12,8 @@
 TaskTcpReadMsg::TaskTcpReadMsg(void *arg) : Task(arg)
 {
     TRACE_FUNC_BEGIN
-    line = new char(MAXBTYE);
+    line = new char(MAXBTYE + 1);
+    line[MAXBTYE] = '\0';
     TRACE_FUNC_LEAVE
 }
 
@@ -33,6 +34,7 @@ void TaskTcpReadMsg::run()
 
     echo("[TaskTcpReadMsg] handling %d\n", fd);
 
+    line[0] = '\0';
     if ((n = recv(fd, line, MAXBTYE, 0)) < 0)
     {
         if (errno == ECONNRESET)
@@ -40,7 +42,6 @@ void TaskTcpReadMsg::run()
         echo("[TaskTcpReadMsg] Error: readline failed: [err %d] - %s\n", errno, strerror(errno));
         if (rdata != NULL)
             delete rdata;
-        delete line;
     }
     else if (n == 0)
     {
@@ -48,7 +49,6 @@ void TaskTcpReadMsg::run()
         echo("[TaskTcpReadMsg] Error: client closed connection.\n");
         if (rdata != NULL)
             delete rdata;
-        delete line;
     }
     else
     {
