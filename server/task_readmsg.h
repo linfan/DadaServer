@@ -5,10 +5,15 @@
 
 #define TASK_TYPE_READ_MSG 1
 
+#define MAXBTYE 10
+
 class TaskReadMsg : public Task
 {
+    private:
+        char *line;
     public:
-        TaskReadMsg(void *arg) : Task(arg) {}
+        TaskReadMsg(void *arg);
+        ~TaskReadMsg();
         void run();
 };
 

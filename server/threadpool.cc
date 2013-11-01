@@ -25,15 +25,16 @@ ThreadPool::~ThreadPool()
 }
 
 // add new work item to the pool
-template<class F>
-void ThreadPool::enqueue(F f)
+//template<class F>
+//void ThreadPool::enqueue(F f)
+void ThreadPool::enqueue(Task *task)
 {
     {
         // acquire lock
         boost::mutex::scoped_lock lock(queue_mutex);
 
         // add the task
-        tasks.push_back(boost::function<void()>(f));
+        tasks.push_back(task);
     } // release lock
 
     // wake up one thread

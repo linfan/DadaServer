@@ -11,6 +11,7 @@
 #include "utility.h"
 extern int errno;
 #define BUFFSIZE 128
+#define HOST "127.0.0.1"
 #define PORT 10086
 
 char* getMessage(char* buffer, int len, FILE* fp)
@@ -68,7 +69,7 @@ int main(int argc,char* argv[])
     int sock;
     struct hostent *hent;
     struct sockaddr_in server;
-    const char *host = "192.168.1.1";
+    const char *host = HOST;
     unsigned short port = PORT;
     switch (argc)
     {

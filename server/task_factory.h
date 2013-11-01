@@ -22,7 +22,7 @@ class TaskFactory
         friend class auto_ptr<TaskFactory>; 
     public:
         static TaskFactory* Ins();
-        Task* CreateWorker(int type, void *arg);
+        Task* CreateTask(int type, void *arg);
 };
 
 #endif

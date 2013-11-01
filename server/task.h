@@ -3,13 +3,13 @@
 
 class Task
 {
-    private:
-        void *arg;
     protected:
-        virtual void run() = 0;
+        void *arg;
     public:
         Task(void *a) : arg(a) { }
-        void operator ()() { run(); }
+        virtual ~Task() { }
+        virtual void run() = 0;
+//        void operator ()() { run(); }
 };
 
 #endif

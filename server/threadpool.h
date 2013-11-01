@@ -9,6 +9,7 @@
 #include <boost/thread/condition.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <stddef.h>
+#include "task.h"
 
 class ThreadWorker;
 
@@ -19,14 +20,15 @@ private:
     // need to keep track of threads so we can join them
     std::vector< boost::thread* > workers;
     // the task queue
-    std::deque< boost::function0<void> > tasks;
+    std::deque< Task* > tasks;
     // synchronization
     boost::mutex queue_mutex;
     boost::condition queue_cond;
     bool stop;
 public:
     ThreadPool(size_t);
-    template<class F> void enqueue(F f);
+    //template<class F> void enqueue(F f);
+    void enqueue(Task*);
     ~ThreadPool();
 };
 

@@ -4,6 +4,7 @@
 
 TaskFactory* TaskFactory::m_ins = NULL;
 auto_ptr<TaskFactory> TaskFactory::m_auto_ptr;
+boost::mutex TaskFactory::inst_mutex;
 
 TaskFactory::TaskFactory()
 {
@@ -21,7 +22,7 @@ TaskFactory* TaskFactory::Ins()
     return m_ins;
 }
 
-Task* TaskFactory::CreateWorker(int type, void *arg)
+Task* TaskFactory::CreateTask(int type, void *arg)
 {
     switch (type)
     {

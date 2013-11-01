@@ -1,9 +1,10 @@
 #include "threadworker.h"
 #include "threadpool.h"
+#include "task.h"
 
 void ThreadWorker::operator()()
 {
-    boost::function0<void> task;
+    Task *task;
     while(true)
     {
         {   // acquire lock
@@ -26,7 +27,8 @@ void ThreadWorker::operator()()
         }   // release lock
 
         // execute the task
-        task();
+        task->run();
+        delete task;
     }
 }
 
