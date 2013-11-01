@@ -1,21 +1,17 @@
 GCC=g++
 APP=dada
 
-all: lib simulator
+all: lib tcp_simulator udp_simulator
 
 lib: $(wildcard ../lib/*.cc)
 	$(GCC) -o lib$(APP).so $^ -ldl -shared -fPIC
 
-simulator: $(wildcard *.cc)
-	$(GCC) -o $(APP)_simulator $^ -lpthread -ldl -L. -ldada -fPIC -I../lib
+tcp_simulator: tcp_simulator.cc
+	$(GCC) -o $(APP)_tcp_simulator $^ -lpthread -ldl -L. -ldada -fPIC -I../lib
+
+udp_simulator: udp_simulator.cc
+	$(GCC) -o $(APP)_udp_simulator $^ -lpthread -ldl -L. -ldada -fPIC -I../lib
 
 clean :
-	rm -f *.o $(APP)_simulator
+	rm -f *.o $(APP)_tcp_simulator $(APP)_udp_simulator
 
-install:
-	cp $(APP)_simulator ~/.bin/
-	cp lib$(APP).so ~/.lib/
-
-uninstall:
-	rm -f ~/.bin/$(APP)_simulator
-	rm -f ~/.lib/lib$(APP).so

@@ -12,7 +12,7 @@ int main(int argc,char* argv[])
     ThreadPool *threadPool = new ThreadPool(4);
 
     TcpServer server(threadPool);
-    server.Connect(LOCAL_ADDR, SERV_PORT);
+    server.Connect(NULL, SERV_PORT);
     server.Run();
 
     TRACE_MAIN_LEAVE

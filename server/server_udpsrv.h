@@ -55,6 +55,13 @@ class UdpServer : public Server
         // socket struct
         sockaddr_in serveraddr;
 
+        // Serice-end socket address
+        struct sockaddr_in fsin;
+        // Service-end socket descriptor
+        int sock;
+        // Service-end socket
+        struct sockaddr_in sin;
+
     public:
         UdpServer(ThreadPool*);
         virtual ~UdpServer();
