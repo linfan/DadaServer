@@ -5,7 +5,3 @@ all:
 clean:
 	$(MAKE) clean -C server
 	$(MAKE) clean -C simulator
-
-install:
-	$(MAKE) install -C server
-	$(MAKE) install -C simulator

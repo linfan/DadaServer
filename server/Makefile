@@ -21,5 +21,3 @@ server: $(OBJS)
 clean :
 	rm -f *.o $(OUTFILE) $(LIBFILE)
 
-install:
-	sleep 1

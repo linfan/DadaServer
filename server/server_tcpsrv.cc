@@ -26,7 +26,10 @@ void TcpServer::Connect(char *host, uint16_t port)
     TRACE_FUNC_BEGIN
     bzero(&serveraddr, sizeof(serveraddr));
     serveraddr.sin_family = AF_INET;
-    inet_aton(host, &(serveraddr.sin_addr));
+    if (host)
+        inet_aton(host, &(serveraddr.sin_addr));
+    else
+        serveraddr.sin_addr.s_addr = INADDR_ANY;
     serveraddr.sin_port = htons(port);
     bind(listenfd, (sockaddr*)&serveraddr, sizeof(serveraddr));
     listen(listenfd, LISTENQ);
