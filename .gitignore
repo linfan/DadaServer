@@ -17,3 +17,4 @@ dada_server
 dada_simulator
 tags
 cscope.*
+*.trc

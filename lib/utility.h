@@ -1,26 +1,28 @@
 #ifndef _UTILITY_H_
 #define _UTILITY_H_
 
+#include <pthread.h>
+
 #define RET_ERR -1
 #define RET_OK  0
 
 #define GEN_TRACE_FILE
 #ifdef GEN_TRACE_FILE
 extern FILE *_apptrace;
-#define TRACE_FUNC_BEGIN fprintf(_apptrace, "%s [ENTER] %s @ %s:%d\n", \
-        __TIME__, __FUNCTION__, __FILE__, __LINE__); \
+#define TRACE_FUNC_BEGIN fprintf(_apptrace, "%s [%lu] [ENTER] %s @ %s:%d\n", \
+        __TIME__, pthread_self(), __FUNCTION__, __FILE__, __LINE__); \
         fflush(_apptrace);
-#define TRACE_FUNC_LEAVE fprintf(_apptrace, "%s [LEAVE] %s @ %s:%d\n", \
-        __TIME__, __FUNCTION__, __FILE__, __LINE__); \
+#define TRACE_FUNC_LEAVE fprintf(_apptrace, "%s [%lu] [LEAVE] %s @ %s:%d\n", \
+        __TIME__, pthread_self(), __FUNCTION__, __FILE__, __LINE__); \
         fflush(_apptrace);
-#define TRACE_FUNC_RET_D(RET) fprintf(_apptrace, "%s [LEAVE] %s @ %s:%d <Code %d>\n", \
-        __TIME__, __FUNCTION__, __FILE__, __LINE__, RET); \
+#define TRACE_FUNC_RET_D(RET) fprintf(_apptrace, "%s [%lu] [LEAVE] %s @ %s:%d <ret: %d>\n", \
+        __TIME__, pthread_self(), __FUNCTION__, __FILE__, __LINE__, RET); \
         fflush(_apptrace);
-#define TRACE_FUNC_RET_F(RET) fprintf(_apptrace, "%s [LEAVE] %s @ %s:%f <Value %d>\n", \
-        __TIME__, __FUNCTION__, __FILE__, __LINE__, RET); \
+#define TRACE_FUNC_RET_F(RET) fprintf(_apptrace, "%s [%lu] [LEAVE] %s @ %s:%f <ret: %d>\n", \
+        __TIME__, pthread_self(), __FUNCTION__, __FILE__, __LINE__, RET); \
         fflush(_apptrace);
-#define TRACE_FUNC_RET_S(RET) fprintf(_apptrace, "%s [LEAVE] %s @ %s:%s <Msg: %d>\n", \
-        __TIME__, __FUNCTION__, __FILE__, __LINE__, RET); \
+#define TRACE_FUNC_RET_S(RET) fprintf(_apptrace, "%s [%lu] [LEAVE] %s @ %s:%s <ret: %d>\n", \
+        __TIME__, pthread_self(), __FUNCTION__, __FILE__, __LINE__, RET); \
         fflush(_apptrace);
 #define TRACE_MAIN_BEGIN \
     _apptrace = fopen("./server.trc", "a"); \
