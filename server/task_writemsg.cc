@@ -16,24 +16,25 @@ void TaskWriteMsg::run()
     // data to wirte back to client
     TcpPkg *rdata = (TcpPkg*)arg;
 
-    echo("[SERVER] writetask %d sending %d : [%d] %s\n", pthread_self(), rdata->fd, rdata->size, rdata->msg);
+    echo("[TaskWriteMsg] sending %d : [%d byte] %s\n", rdata->fd, rdata->size, rdata->msg->c_str());
     // send responce to client
-    if ((n = send(rdata->fd, rdata->msg, rdata->size, 0)) < 0)
+    if ((n = send(rdata->fd, rdata->msg->c_str(), rdata->size, 0)) < 0)
     {
         if (errno == ECONNRESET)
             close(rdata->fd);
-        echo("[SERVER] Error: send responce failed: %s\n", strerror(errno));
+        echo("[TaskWriteMsg] Error: send responce failed: %s\n", strerror(errno));
     }
     else if (n == 0)
     {
         close(rdata->fd);
-        echo("[SERVER] Error: client closed connection.");
+        echo("[TaskWriteMsg] Error: client closed connection.\n");
     }
     else
     {
-        echo("[SERVER] Succeed: message send to client.");
-        rdata->srv->WaitRecv(rdata->fd);
+        echo("[TaskWriteMsg] Succeed: message send to client.\n");
+        rdata->srv->ContinueRecv(rdata->fd);
     }
     // delete data
+    delete rdata->msg;
     delete rdata;
 }

@@ -58,7 +58,7 @@ void TcpServer::Run()
                 if (connfd < 0)
                     errexit("connfd < 0");
                 setnonblocking(connfd);
-                echo("[SERVER] connect from %s \n", inet_ntoa(clientaddr.sin_addr));
+                echo("[TcpServer] connect from %s \n", inet_ntoa(clientaddr.sin_addr));
                 ev.data.fd = connfd;
                 // monitor in message, edge trigger
                 ev.events = EPOLLIN | EPOLLET;
@@ -68,9 +68,10 @@ void TcpServer::Run()
             // Received data
             else if (events[i].events & EPOLLIN)
             {
+                echo("[TcpServer] got a read request from %d \n", events[i].data.fd);
                 if (events[i].data.fd < 0)
                     continue;
-                echo("[SERVER] put task %d to read queue\n", events[i].data.fd);
+                echo("[TcpServer] put task %d to read queue\n", events[i].data.fd);
                 TcpPkg* pkg= new TcpPkg;
                 pkg->fd = events[i].data.fd;
                 pkg->srv = this;
@@ -80,18 +81,20 @@ void TcpServer::Run()
             // Have data to send
             else if (events[i].events & EPOLLOUT)
             {
+                echo("[TcpServer] got a write request from %d \n", events[i].data.fd);
                 if (events[i].data.ptr == NULL)
                     continue;
                 if (sendingQueue.size() == 0)
                     continue;
-                echo("[SERVER] put task %d to write queue\n", events[i].data.fd);
+                echo("[TcpServer] put task %d to write queue\n", events[i].data.fd);
                 Task *task = TaskFactory::Ins()->CreateTask(TASK_TYPE_WRITE_MSG, 
                         (void*)sendingQueue.front());
+                sendingQueue.pop();
                 threadPool->enqueue(task);
             }
             else
             {
-                echo("[SERVER] Error: unknown epoll event");
+                echo("[TcpServer] Error: unknown epoll event\n");
             }
         }
     }
@@ -99,17 +102,17 @@ void TcpServer::Run()
 
 bool TcpServer::TriggerSend(int fd, char* msg, int len)
 {
+    echo("[TcpServer] trigger send.\n");
     try
     {
-        echo("[TcpServer] trigger to send.");
         TcpPkg *pkg = new TcpPkg();
         pkg->fd = fd;
         pkg->size = len;
-        pkg->msg = msg;
+        pkg->msg = new string(msg);
+        pkg->srv = this;
+        sendingQueue.push(pkg);
         // request will be handle in separate thread
-        ev.events = EPOLLOUT | EPOLLET;
-        // modify moditored fd event
-        epoll_ctl(epfd, EPOLL_CTL_MOD, fd, &ev);
+        ContinueSend(fd);
     }
     catch(...)
     {
@@ -118,9 +121,18 @@ bool TcpServer::TriggerSend(int fd, char* msg, int len)
     return true;
 }
 
-void TcpServer::WaitRecv(int fd)
+void TcpServer::ContinueSend(int fd)
 {
-    echo("[TcpServer] wait to recv.");
+    echo("[TcpServer] continue to send.\n");
+    // Modify monitored event to EPOLLOUT, wait next loop to send data
+    ev.events = EPOLLOUT | EPOLLET;
+    // modify moditored fd event
+    epoll_ctl(epfd, EPOLL_CTL_MOD, fd, &ev);
+}
+
+void TcpServer::ContinueRecv(int fd)
+{
+    echo("[TcpServer] continue to recv.\n");
     // Modify monitored event to EPOLLIN, wait next loop to receive data
     ev.events = EPOLLIN | EPOLLET;
     // modify moditored fd event

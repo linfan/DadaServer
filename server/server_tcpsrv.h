@@ -43,7 +43,7 @@ struct TcpPkg
     // real message length
     int size;
     // message to send
-    char *msg;
+    string *msg;
     // TcpServer
     TcpServer *srv;
 };
@@ -77,7 +77,8 @@ class TcpServer : public Server
         ~TcpServer();
         void Run();
         bool TriggerSend(int fd, char* data, int len);
-        void WaitRecv(int fd);
+        void ContinueSend(int fd);
+        void ContinueRecv(int fd);
 };
 
 #endif
