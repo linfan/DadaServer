@@ -3,6 +3,11 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <string.h>
+#include "utility.h"
+
+#ifdef GEN_TRACE_FILE
+FILE *_apptrace;
+#endif
 
 // Print work information
 void echo(const char* format, ...)

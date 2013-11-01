@@ -1,8 +1,10 @@
 #include "server_tcpsrv.h"
+#include "utility.h"
 
-TcpServer::TcpServer()
+TcpServer::TcpServer(ThreadPool* pool)
 {
-    threadPool = new ThreadPool(4);
+    TRACE_FUNC_BEGIN
+    threadPool = pool;
 
     // epoll descriptor, for handling accept
     epfd = epoll_create(256);
@@ -16,18 +18,26 @@ TcpServer::TcpServer()
     // register epoll event
     epoll_ctl(epfd, EPOLL_CTL_ADD, listenfd, &ev);
 
+    TRACE_FUNC_LEAVE
+}
+
+void TcpServer::Connect(char *host, uint16_t port)
+{
+    TRACE_FUNC_BEGIN
     bzero(&serveraddr, sizeof(serveraddr));
     serveraddr.sin_family = AF_INET;
-    const char *local_addr = LOCAL_ADDR;
-    inet_aton(local_addr, &(serveraddr.sin_addr));
-    serveraddr.sin_port = htons(SERV_PORT);
+    inet_aton(host, &(serveraddr.sin_addr));
+    serveraddr.sin_port = htons(port);
     bind(listenfd, (sockaddr*)&serveraddr, sizeof(serveraddr));
     listen(listenfd, LISTENQ);
+    TRACE_FUNC_LEAVE
 }
 
 TcpServer::~TcpServer()
 {
+    TRACE_FUNC_BEGIN
     delete threadPool;
+    TRACE_FUNC_LEAVE
 }
 
 void TcpServer::setnonblocking(int sock)
@@ -42,6 +52,7 @@ void TcpServer::setnonblocking(int sock)
 
 void TcpServer::Run()
 {
+    TRACE_FUNC_BEGIN
     for(;;)
     {
         // waiting for epoll event
@@ -75,7 +86,7 @@ void TcpServer::Run()
                 TcpPkg* pkg= new TcpPkg;
                 pkg->fd = events[i].data.fd;
                 pkg->srv = this;
-                Task *task = TaskFactory::Ins()->CreateTask(TASK_TYPE_READ_MSG, (void*)pkg);
+                Task *task = TaskFactory::Ins()->CreateTask(TASK_TYPE_TCP_READ_MSG, (void*)pkg);
                 threadPool->enqueue(task);
             }
             // Have data to send
@@ -87,7 +98,7 @@ void TcpServer::Run()
                 if (sendingQueue.size() == 0)
                     continue;
                 echo("[TcpServer] put task %d to write queue\n", events[i].data.fd);
-                Task *task = TaskFactory::Ins()->CreateTask(TASK_TYPE_WRITE_MSG, 
+                Task *task = TaskFactory::Ins()->CreateTask(TASK_TYPE_TCP_WRITE_MSG, 
                         (void*)sendingQueue.front());
                 sendingQueue.pop();
                 threadPool->enqueue(task);
@@ -98,11 +109,12 @@ void TcpServer::Run()
             }
         }
     }
+    TRACE_FUNC_LEAVE
 }
 
 bool TcpServer::TriggerSend(int fd, char* msg, int len)
 {
-    echo("[TcpServer] trigger send.\n");
+    TRACE_FUNC_BEGIN
     try
     {
         TcpPkg *pkg = new TcpPkg();
@@ -116,26 +128,31 @@ bool TcpServer::TriggerSend(int fd, char* msg, int len)
     }
     catch(...)
     {
+        TRACE_FUNC_RET_D(0)
         return false;
     }
+    TRACE_FUNC_RET_D(1)
     return true;
 }
 
 void TcpServer::ContinueSend(int fd)
 {
-    echo("[TcpServer] continue to send.\n");
+    TRACE_FUNC_BEGIN
     // Modify monitored event to EPOLLOUT, wait next loop to send data
     ev.events = EPOLLOUT | EPOLLET;
     // modify moditored fd event
     epoll_ctl(epfd, EPOLL_CTL_MOD, fd, &ev);
+    TRACE_FUNC_LEAVE
 }
 
 void TcpServer::ContinueRecv(int fd)
 {
+    TRACE_FUNC_BEGIN
     echo("[TcpServer] continue to recv.\n");
     // Modify monitored event to EPOLLIN, wait next loop to receive data
     ev.events = EPOLLIN | EPOLLET;
     // modify moditored fd event
     epoll_ctl(epfd, EPOLL_CTL_MOD, fd, &ev);
+    TRACE_FUNC_LEAVE
 }
 

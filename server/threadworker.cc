@@ -5,6 +5,7 @@
 
 void ThreadWorker::operator()()
 {
+    TRACE_FUNC_BEGIN
     Task *task;
     while(true)
     {
@@ -21,7 +22,10 @@ void ThreadWorker::operator()()
             echo("[ThreadWorker] got a task\n");
 
             if(pool->stop) // exit if the pool is stopped
+            {
+                TRACE_FUNC_LEAVE
                 return;
+            }
 
             // get the task from the queue
             task = pool->tasks.front();

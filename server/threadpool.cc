@@ -5,18 +5,20 @@
 // the constructor just launches some amount of workers
 ThreadPool::ThreadPool(size_t threads)
 {
+    TRACE_FUNC_BEGIN
     stop = false;
     for(size_t i = 0;i < threads;++i)
     {
         boost::thread *t = new boost::thread(ThreadWorker(this));
         workers.push_back(t);
     }
-    echo("[ThreadPool] thread pool created\n");
+    TRACE_FUNC_LEAVE
 }
 
 // the destructor joins all threads
 ThreadPool::~ThreadPool()
 {
+    TRACE_FUNC_BEGIN
     // stop all threads
     stop = true;
     queue_cond.notify_all();
@@ -25,7 +27,7 @@ ThreadPool::~ThreadPool()
     for(size_t i = 0; i < workers.size();++i)
         workers[i]->join();
 
-    echo("[ThreadPool] thread pool destroied\n");
+    TRACE_FUNC_LEAVE
 }
 
 // add new work item to the pool
@@ -33,6 +35,7 @@ ThreadPool::~ThreadPool()
 //void ThreadPool::enqueue(F f)
 void ThreadPool::enqueue(Task *task)
 {
+    TRACE_FUNC_BEGIN
     {
         // acquire lock
         boost::mutex::scoped_lock lock(queue_mutex);
@@ -44,4 +47,5 @@ void ThreadPool::enqueue(Task *task)
 
     // wake up one thread
     queue_cond.notify_one();
+    TRACE_FUNC_LEAVE
 }
