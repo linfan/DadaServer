@@ -34,7 +34,7 @@ void UdpServer::Connect(char *host, uint16_t port)
         errexit("can't create socket: %s \n", strerror(errno));
     // Bind socket to service-end address
     if (bind(sock, (struct sockaddr*)&sin, sizeof(sin)) < 0)
-        errexit("can't bind to %s port: %s \n", service, strerror(errno));
+        errexit("can't bind to %s port: %s \n", port, strerror(errno));
 
     TRACE_FUNC_LEAVE
 }
