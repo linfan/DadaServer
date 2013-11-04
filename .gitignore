@@ -13,8 +13,7 @@
 *.a
 
 # Output files
-dada_server
-dada_simulator
 tags
 cscope.*
 *.trc
+dada_*
