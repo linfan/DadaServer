@@ -1,4 +1,7 @@
 DadaServer
 ==========
 
-A genernal TCP/UDP server with epoll and thread pool support named dada (means tick-tock in Chinese)
+Dada(哒哒) is a demo of TCP server that using epoll (libevent) & thread pool (based on BOOST) & mysql connection pool (based on mysql-connector-c++).
+ - Thread pool: done
+ - epoll: done, will be rewrite using libevent
+ - MySQL connection pool: on going
