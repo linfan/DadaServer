@@ -5,4 +5,4 @@ Dada(哒哒) is a demo of TCP server that using epoll (libevent) & thread pool (
  - Thread pool: done
  - epoll: done, will be rewrite using libevent
  - MySQL connection pool: on going
- - HTTP GET/POST support: not start yet
+ - HTTP GET/POST support: on going
