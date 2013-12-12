@@ -1,8 +1,6 @@
 #include "task_factory.h"
 #include "task_tcpreadmsg.h"
 #include "task_tcpwritemsg.h"
-#include "task_udpreadmsg.h"
-#include "task_udpwritemsg.h"
 #include "utility.h"
 
 TaskFactory* TaskFactory::m_ins = NULL;
@@ -39,10 +37,6 @@ Task* TaskFactory::CreateTask(int type, void *arg)
             return new TaskTcpReadMsg(arg);
         case TASK_TYPE_TCP_WRITE_MSG:
             return new TaskTcpWriteMsg(arg);
-        case TASK_TYPE_UDP_READ_MSG:
-            return new TaskUdpReadMsg(arg);
-        case TASK_TYPE_UDP_WRITE_MSG:
-            return new TaskUdpWriteMsg(arg);
         default:
             return NULL;
     }
