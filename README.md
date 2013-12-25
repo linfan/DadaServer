@@ -8,9 +8,9 @@ Dada(哒哒) is a demo of TCP server that using epoll (libevent) & thread pool (
  - HTTP GET/POST support: on going
 
 Request:
-1) boost
+ 1. boost
 http://boost.org
-2) mysql community server
+ 2. mysql community server
 http://dev.mysql.com/downloads/mysql
-3) mysql-connector-c++
+ 3. mysql-connector-c++
 http://dev.mysql.com/downloads/connector/cpp

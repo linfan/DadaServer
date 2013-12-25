@@ -13,7 +13,6 @@ all: lib server
 
 lib: $(wildcard ../lib/*.cc)
 	$(GCC) -o $(LIBFILE) $^ -ldl -lpthread -shared -fPIC
-	rm -f *.o
 
 server: $(OBJS)
 	$(GCC) -o $(OUTFILE) $^ -Wall -L. -L$(BOOST_LIB_DIR) -L$(MYSQL_CPP_LIB_DIR) \
