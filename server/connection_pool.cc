@@ -15,7 +15,7 @@ using namespace sql;
 
 ConnPool *ConnPool::connPool = NULL;
 
-//连接池的构造函数
+// Constructor of the cnnection pool
 ConnPool::ConnPool(string url, string userName, string password, int maxSize) {
 	this->maxSize = maxSize;
 	this->curSize = 0;
@@ -25,22 +25,23 @@ ConnPool::ConnPool(string url, string userName, string password, int maxSize) {
 	try {
 		this->driver = sql::mysql::get_driver_instance();
 	} catch (sql::SQLException&e) {
-		perror("驱动连接出错;\n");
+		perror("SQL driver error.\n");
 	} catch (std::runtime_error&e) {
-		perror("运行出错了\n");
+		perror("SQL runtime error.\n");
 	}
 	this->InitConnection(maxSize / 2);
 }
 
-//获取连接池对象，单例模式
+// Get the connection pool singleton instance
 ConnPool*ConnPool::GetInstance() {
 	if (connPool == NULL) {
-		connPool = new ConnPool("tcp://127.0.0.1:3306", "root", "123456", 50);
+		connPool = new ConnPool("tcp://127.0.0.1:3306",
+                CONNPOOL_USER, CONNPOOL_PASSWORD, CONNPOOL_POOLSIZE);
 	}
 	return connPool;
 }
 
-//初始化连接池，创建最大连接数的一半连接数量
+// Initialize connection pool, create half of the maximum connection number
 void ConnPool::InitConnection(int iInitialSize) {
 	Connection*conn;
 	pthread_mutex_lock(&lock);
@@ -50,47 +51,48 @@ void ConnPool::InitConnection(int iInitialSize) {
 			connList.push_back(conn);
 			++(this->curSize);
 		} else {
-			perror("创建CONNECTION出错");
+			perror("Create connection error.\n");
 		}
 	}
 	pthread_mutex_unlock(&lock);
 }
 
-//创建连接,返回一个Connection
+// Create a new connection
 Connection* ConnPool::CreateConnection() {
 	Connection*conn;
 	try {
-		conn = driver->connect(this->url, this->username, this->password); //建立连接
+        // Do connect
+		conn = driver->connect(this->url, this->username, this->password);
 		return conn;
 	} catch (sql::SQLException&e) {
-		perror("创建连接出错");
+		perror("Connection creation error.\n");
 		return NULL;
 	} catch (std::runtime_error&e) {
-		perror("运行时出错");
+		perror("Connection creation runtime error.\n");
 		return NULL;
 	}
 }
 
-//在连接池中获得一个连接
+// Acquire a connection from pool
 Connection*ConnPool::GetConnection() {
 	Connection*con;
 	pthread_mutex_lock(&lock);
 
-	if (connList.size() > 0) {	//连接池容器中还有连接
-		con = connList.front(); //得到第一个连接
-		connList.pop_front(); 	//移除第一个连接
-		if (con->isClosed()) {	//如果连接已经被关闭，删除后重新建立一个
+	if (connList.size() > 0) {	// There are available connection
+		con = connList.front(); // Fetch first connection from list
+		connList.pop_front(); 	// Remove the fetched connection
+		if (con->isClosed()) {	// If connection force closed, reconnect
 			delete con;
 			con = this->CreateConnection();
 		}
-		//如果连接为空，则创建连接出错
+		// Reduce establed connection size if connection is NULL
 		if (con == NULL) {
 			--curSize;
 		}
 		pthread_mutex_unlock(&lock);
 		return con;
 	} else {
-		if (curSize < maxSize) { //还可以创建新的连接
+		if (curSize < maxSize) { // More connection can be created
 			con = this->CreateConnection();
 			if (con) {
 				++curSize;
@@ -100,14 +102,14 @@ Connection*ConnPool::GetConnection() {
 				pthread_mutex_unlock(&lock);
 				return NULL;
 			}
-		} else { //建立的连接数已经达到maxSize
+		} else { // Reached the maximum size
 			pthread_mutex_unlock(&lock);
 			return NULL;
 		}
 	}
 }
 
-//回收数据库连接
+// Release the connection back to idle list
 void ConnPool::ReleaseConnection(sql::Connection * conn) {
 	if (conn) {
 		pthread_mutex_lock(&lock);
@@ -116,24 +118,24 @@ void ConnPool::ReleaseConnection(sql::Connection * conn) {
 	}
 }
 
-//连接池的析构函数
+// Destructor of connection pool
 ConnPool::~ConnPool() {
 	this->DestoryConnPool();
 }
 
-//销毁连接池,首先要先销毁连接池的中连接
+// Destory pool, disconnect all connection first
 void ConnPool::DestoryConnPool() {
 	list<Connection*>::iterator icon;
 	pthread_mutex_lock(&lock);
 	for (icon = connList.begin(); icon != connList.end(); ++icon) {
-		this->DestoryConnection(*icon); //销毁连接池中的连接
+		this->DestoryConnection(*icon); // Disconnect it
 	}
 	curSize = 0;
-	connList.clear(); //清空连接池中的连接
+	connList.clear(); // Clean the idle list
 	pthread_mutex_unlock(&lock);
 }
 
-//销毁一个连接
+// Disconnect a connection
 void ConnPool::DestoryConnection(Connection* conn) {
 	if (conn) {
 		try {

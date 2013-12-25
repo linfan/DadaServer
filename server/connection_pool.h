@@ -20,27 +20,31 @@
 using namespace std;
 using namespace sql;
 
+const string CONNPOOL_USER = "dada";
+const string CONNPOOL_PASSWORD = "dada";
+const int CONNPOOL_POOLSIZE = 10;
+
 class ConnPool {
 private:
-	int curSize; //当前已建立的数据库连接数量
-	int maxSize; //连接池中定义的最大数据库连接数
+	int curSize; // Current established connection count
+	int maxSize; // Maximum established connection count
 	string username;
 	string password;
 	string url;
-	list<Connection*> connList; //连接池的容器队列
-	pthread_mutex_t lock; //线程锁
+	list<Connection*> connList; // Connection pool container
+	pthread_mutex_t lock; // Mutex lock for connList access
 	static ConnPool *connPool;
 	Driver*driver;
 
-	Connection*CreateConnection(); //创建一个连接
-	void InitConnection(int iInitialSize); //初始化数据库连接池
-	void DestoryConnection(Connection *conn); //销毁数据库连接对象
-	void DestoryConnPool(); //销毁数据库连接池
-	ConnPool(string url, string user, string password, int maxSize); //构造方法
+	Connection*CreateConnection(); // Create a database connection
+	void InitConnection(int iInitialSize); // Initialize database connection
+	void DestoryConnection(Connection *conn); // Destory database connection
+	void DestoryConnPool(); // Destory whole connection pool
+	ConnPool(string url, string user, string password, int maxSize); // Constructor
 public:
 	~ConnPool();
-	Connection*GetConnection(); //获得数据库连接
-	void ReleaseConnection(Connection *conn); //将数据库连接放回到连接池的容器中
-	static ConnPool *GetInstance(); //获取数据库连接池对象
+	Connection*GetConnection(); // Acquire connection object
+	void ReleaseConnection(Connection *conn); // Put used connection object back to container
+	static ConnPool *GetInstance(); // Acquire connection pool singleton instance
 };
 #endif	/*_CONNECTION_POOL_H */
